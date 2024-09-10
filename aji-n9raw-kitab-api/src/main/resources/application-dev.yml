@@ -29,4 +29,10 @@ spring:
         timeout: 3000
         writetimeout: 5000
 
+application:
+  security:
+    jwt:
+        secret-key: hadadevenvironment
+        expiration: 8640000
+
 
