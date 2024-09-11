@@ -1,6 +1,7 @@
 package com.abde.aji_n9raw_kitab_api.auth;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ public class AuthenticationController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<?> register(
             @RequestBody @Valid RequestRegestration request
-    ){
+    ) throws MessagingException {
         service.register(request);
         return ResponseEntity.accepted().build();
     }

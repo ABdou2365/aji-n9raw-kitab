@@ -1,11 +1,15 @@
 package com.abde.aji_n9raw_kitab_api.auth;
 
+import com.abde.aji_n9raw_kitab_api.email.EmailService;
+import com.abde.aji_n9raw_kitab_api.email.EmailTemplateName;
 import com.abde.aji_n9raw_kitab_api.role.RoleRepo;
 import com.abde.aji_n9raw_kitab_api.user.Token;
 import com.abde.aji_n9raw_kitab_api.user.TokenRepo;
 import com.abde.aji_n9raw_kitab_api.user.User;
 import com.abde.aji_n9raw_kitab_api.user.UserRepo;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,12 +21,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
+    @Value("${application.mailing.frontend.activationUrl}")
+    private String ActivationUrl;
+
     private final RoleRepo roleRepo;
     private final PasswordEncoder passwordEncoder;
     private final UserRepo userRepo;
     private final TokenRepo tokenRepo;
+    private final EmailService emailService;
 
-    public void register(RequestRegestration request) {
+
+    public void register(RequestRegestration request) throws MessagingException {
         var userRole = roleRepo.findByName("USER")
                 .orElseThrow(()-> new IllegalStateException("User role not found"));
         var user = User.builder()
@@ -39,11 +48,17 @@ public class AuthenticationService {
         sendValidationEmail(user);
     }
 
-    private void sendValidationEmail(User user) {
+    private void sendValidationEmail(User user) throws MessagingException {
         var newToken = generateAndSaveActivationToken(user);
         // send email
-        
-
+        emailService.sendEmail(
+                user.getEmail(),
+                user.getUsername(),
+                EmailTemplateName.ACTIVATE_ACCOUNT,
+                ActivationUrl,
+                newToken,
+                "Account activation"
+        );
     }
 
     private String generateAndSaveActivationToken(User user) {
@@ -56,7 +71,7 @@ public class AuthenticationService {
                 .build();
         tokenRepo.save(token);
 
-        return null;
+        return generatedToken;
     }
 
     private String generatedActivationToken(int length) {
