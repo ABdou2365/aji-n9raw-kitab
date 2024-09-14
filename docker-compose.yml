@@ -13,17 +13,17 @@ services:
       - 5432:5432
     networks:
       - spring-demo
-    restart: Unless-stopped
+    restart: unless-stopped
   mail-dev:
     container_name: mail-dev-ank
     image: maildev/maildev
     ports:
-      - 1080:1080 //to display the ui of the app
-      - 1025:1025 //used for us to implement the mailing
+      - 1080:1080
+      - 1025:1025
 
 
 networks:
-  -spring-demo:
+  spring-demo:
     driver: bridge
 
 volumes:

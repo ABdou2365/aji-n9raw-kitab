@@ -37,5 +37,5 @@ application:
   mailing:
     frontend:
       activationUrl: http://localhost:4200/activate-account
-
-
+server:
+  port: 8088

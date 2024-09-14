@@ -3,6 +3,7 @@ package com.abde.aji_n9raw_kitab_api.auth;
 import com.abde.aji_n9raw_kitab_api.email.EmailService;
 import com.abde.aji_n9raw_kitab_api.email.EmailTemplateName;
 import com.abde.aji_n9raw_kitab_api.role.RoleRepo;
+import com.abde.aji_n9raw_kitab_api.security.JwtService;
 import com.abde.aji_n9raw_kitab_api.user.Token;
 import com.abde.aji_n9raw_kitab_api.user.TokenRepo;
 import com.abde.aji_n9raw_kitab_api.user.User;
@@ -10,17 +11,21 @@ import com.abde.aji_n9raw_kitab_api.user.UserRepo;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
 
+    private final JwtService jwtService;
     @Value("${application.mailing.frontend.activationUrl}")
     private String ActivationUrl;
 
@@ -29,6 +34,7 @@ public class AuthenticationService {
     private final UserRepo userRepo;
     private final TokenRepo tokenRepo;
     private final EmailService emailService;
+    private final AuthenticationManager authenticationManager;
 
 
     public void register(RequestRegestration request) throws MessagingException {
@@ -50,10 +56,10 @@ public class AuthenticationService {
 
     private void sendValidationEmail(User user) throws MessagingException {
         var newToken = generateAndSaveActivationToken(user);
-        // send email
+        // send email(
         emailService.sendEmail(
                 user.getEmail(),
-                user.getUsername(),
+                user.getFullName(),
                 EmailTemplateName.ACTIVATE_ACCOUNT,
                 ActivationUrl,
                 newToken,
@@ -69,6 +75,7 @@ public class AuthenticationService {
                 .expiresAt(LocalDateTime.now().plusMinutes(15))
                 .user(user)
                 .build();
+
         tokenRepo.save(token);
 
         return generatedToken;
@@ -83,5 +90,21 @@ public class AuthenticationService {
             codeBuilder.append(characters.charAt(randomIndex));
         }
         return codeBuilder.toString();
+    }
+
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        var auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        var claims = new HashMap<String,Object>();
+        var user = (User) auth.getPrincipal();
+        claims.put("fullName", user.getFullName());
+        var jwtToken = jwtService.generateToken(claims,user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken).build();
+
     }
 }
