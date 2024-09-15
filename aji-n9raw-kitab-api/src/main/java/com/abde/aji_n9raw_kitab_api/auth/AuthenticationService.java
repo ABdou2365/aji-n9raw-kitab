@@ -107,4 +107,22 @@ public class AuthenticationService {
                 .token(jwtToken).build();
 
     }
+
+
+    public void activateAccount(String token) throws MessagingException {
+        Token savedToken = tokenRepo.findByToken(token)
+                .orElseThrow(()-> new IllegalStateException("Token not found"));
+        if(LocalDateTime.now().isAfter(
+                savedToken.getExpiresAt()
+        )){
+            sendValidationEmail(savedToken.getUser());
+            throw new IllegalStateException("Token expired, A new token has been sent");
+        }
+        var user = userRepo.findById(savedToken.getUser().getId())
+                .orElseThrow(()-> new IllegalStateException("User not found"));
+        user.setEnabled(true);
+        userRepo.save(user);
+        savedToken.setValidatedAt(LocalDateTime.now());
+        tokenRepo.save(savedToken);
+    }
 }
