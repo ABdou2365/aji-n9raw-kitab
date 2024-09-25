@@ -6,7 +6,9 @@ services:
       POSTGRES_USER: username
       POSTGRES_PASSWORD: password
       PGDATA: /var/lib/postgresql/data
+      #Specifies the location where PostgreSQL will store its data inside the container. This is the default data directory.
       POSTGRES_DB: aji-n9raw-kitab
+    #This section mounts external storage to the container, so that data persists between restarts
     volumes:
       - postgres:/data/postgres
     ports:
@@ -18,7 +20,9 @@ services:
     container_name: mail-dev-ank
     image: maildev/maildev
     ports:
+      #Maps port 1080 on the host to port 1080 in the container. This port is used for Maildev’s web interface, where you can see emails that have been sent.
       - 1080:1080
+      #Maps port 1025 on the host to port 1025 in the container. This port is used for SMTP (Simple Mail Transfer Protocol), where other services (like your app) can send emails to Maildev.
       - 1025:1025
 
 
