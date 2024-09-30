@@ -25,6 +25,7 @@ public class Book extends BaseEntity {
     private boolean archived;
     private boolean shareable;
 
+
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
@@ -34,4 +35,18 @@ public class Book extends BaseEntity {
 
     @OneToMany(mappedBy = "book")
     private List<BookTransactionHistory> histories;
+
+    @Transient
+    public double getRate(){
+        if(feedbacks == null || feedbacks.isEmpty()){
+            return 0.0;
+        }
+        var rate = this.feedbacks.stream()
+                .mapToDouble(Feedback::getNote)
+                .average()
+                .orElse(0.0);
+        // math bounding if it's 3.25 it will be 3 , if it's 3.88 it will be 4;
+        double roundedRate = Math.round(rate * 10.0)/10.0;
+        return roundedRate;
+    }
 }
