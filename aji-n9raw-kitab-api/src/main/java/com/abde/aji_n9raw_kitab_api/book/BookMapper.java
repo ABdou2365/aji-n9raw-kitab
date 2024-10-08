@@ -1,5 +1,7 @@
 package com.abde.aji_n9raw_kitab_api.book;
 
+import com.abde.aji_n9raw_kitab_api.history.BookTransactionHistory;
+import com.abde.aji_n9raw_kitab_api.history.BookTransactionHistoryResponse;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,6 +34,18 @@ public class BookMapper {
                 .owner(book.getOwner().getFullName())
                 //to do later
                 //.cover()
+                .build();
+    }
+
+    public BookTransactionHistoryResponse toBookTransactionHistoryResponse(BookTransactionHistory bookTransactionHistory) {
+        return BookTransactionHistoryResponse
+                .builder()
+                .id(bookTransactionHistory.getBook().getId())
+                .title(bookTransactionHistory.getBook().getTitle())
+                .author(bookTransactionHistory.getBook().getAuthor())
+                .rate(bookTransactionHistory.getBook().getRate())
+                .returned(bookTransactionHistory.isReturned())
+                .returnedApproved(bookTransactionHistory.isReturnApproved())
                 .build();
     }
 }
