@@ -1,7 +1,9 @@
 package com.abde.aji_n9raw_kitab_api.book;
 
+import com.abde.aji_n9raw_kitab_api.file.FileUtils;
 import com.abde.aji_n9raw_kitab_api.history.BookTransactionHistory;
 import com.abde.aji_n9raw_kitab_api.history.BookTransactionHistoryResponse;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,8 +34,7 @@ public class BookMapper {
                 .archived(book.isArchived())
                 .shareable(book.isShareable())
                 .owner(book.getOwner().getFullName())
-                //to do later
-                //.cover()
+                .cover(FileUtils.readFileFromLocation(book.getBookCover()))
                 .build();
     }
 

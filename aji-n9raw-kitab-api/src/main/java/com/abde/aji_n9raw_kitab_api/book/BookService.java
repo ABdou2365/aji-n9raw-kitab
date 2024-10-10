@@ -207,7 +207,7 @@ public class BookService {
             throw new OperationNotPermittedException("You cannot borrow or return your own book");
         }
         BookTransactionHistory borrowedBook = transactionHistoryRepository.findByBookIdAndOwnerId(bookId, user.getId())
-                .orElseThrow(()-> new EntityNotFoundException("The book is not returned, you cannot approvet" +
+                .orElseThrow(()-> new EntityNotFoundException("The book is not returned, you cannot approve" +
                         " it's return"));
         borrowedBook.setReturnApproved(true);
         return transactionHistoryRepository.save(borrowedBook).getId();
